@@ -7,7 +7,7 @@ class Client:
 	def __init__(self):
 		self.cfile = None
 		global s
-		
+
 		s = socket.socket()
 		port = 908
 		host = self.query_hostname()
@@ -33,6 +33,9 @@ class Client:
 		decoded = file_data.decode("utf-8") #need to decode bytes that were sent by server
 		f.write(decoded)
 		f.close()
+
+	def verify_ledger(self):
+		pass
 
 
 if __name__ == "__main__":

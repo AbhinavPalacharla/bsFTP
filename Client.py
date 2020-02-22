@@ -4,11 +4,10 @@ import shutil
 
 class Client:
 
-	#cfile = None
-
 	def __init__(self):
 		self.cfile = None
 		global s
+		
 		s = socket.socket()
 		port = 908
 		host = self.query_hostname()

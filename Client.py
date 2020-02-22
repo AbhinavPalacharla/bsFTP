@@ -1,6 +1,7 @@
 import socket
 import os
-import shutil
+import re
+import uuid
 
 class Client:
 
@@ -33,6 +34,24 @@ class Client:
 		decoded = file_data.decode("utf-8") #need to decode bytes that were sent by server
 		f.write(decoded)
 		f.close()
+
+	def send_cmac(self):
+		#function to send mac address to miner
+		s = socket.socket()
+		host = socket.gethostname()
+		print(f"host: {host}")
+		port = 909
+		s.bind((host, port))
+		s.listen(1)
+
+		cmac = self.get_cmac()
+
+		conn, addr = s.accept()
+		conn.send(bytes(cmac, "utf-8"))
+
+	def get_cmac(self):
+		mac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
+		return mac
 
 	def verify_ledger(self):
 		pass

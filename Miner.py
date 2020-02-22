@@ -1,5 +1,7 @@
 import os
 import socket
+import re
+import uuid
 
 class Miner:
 
@@ -8,13 +10,18 @@ class Miner:
 		self.cmac = None #client mac address
 		self.mmac = None #miner mac address
 
-		self.get_server_mac()
-		#pass
+		print(f"[+] Give the server hostname")
+		self.smac = self.get_mac()
+
+		print(f"[+] Give the client hostname")
+		self.cmac = self.get_mac()
+
+		self.mmac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 
 	def verify_ledger(self):
 		pass
 
-	def get_server_mac(self):
+	def get_mac(self):
 		s = socket.socket()
 		port = 909
 		host = self.query_hostname()
@@ -22,13 +29,13 @@ class Miner:
 		print(f"[+] Connecting to {host} on port {port}")
 		s.connect((host,port))
 
-		encoded_smac = s.recv(1024)
-		smac = encoded_smac.decode("utf-8")
+		encoded_mac = s.recv(1024)
+		mac = encoded_mac.decode("utf-8")
 
-		return smac
+		return mac
 
 	def query_hostname(self):
-		hostname = input(str("[+] Enter the hostname of the server:  "))
+		hostname = input(str("[+] Enter the hostname:  "))
 		return hostname
 
 if __name__ == "__main__":

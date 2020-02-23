@@ -2,6 +2,7 @@ import socket
 import os
 import re
 import uuid
+import hashlib
 
 class Client:
 
@@ -52,6 +53,25 @@ class Client:
 	def get_cmac(self):
 		mac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 		return mac
+
+	def send_cfhash(self):
+		s = socket.socket()
+		host = socket.gethostname()
+		print(f"host: {host}")
+		port = 910
+		s.bind((host, port))
+		s.listen(1)
+
+		cfhash = self.get_fhash()
+
+		conn, addr = s.accept()
+		conn.send(bytes(cfhash, "utf-8"))
+
+	def get_fhash(self):
+		cwd = os.getcwd()
+		file = f"{cwd}/downloads/{self.cfile}"
+		fhash = hashlib.sha256(open(file, 'rb').read()).hexdigest() #using sha256, stronger than md5
+		return fhash
 
 	def verify_ledger(self):
 		pass

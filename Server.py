@@ -1,16 +1,19 @@
 import socket
 import os
-import shutil
 import uuid
 import re
+import hashlib
 
 class Server:
 
 	def __init__(self):
 		global conn, addr
 		self.sfile = None
-
+		'''
 		self.send_smac()
+		'''
+
+		self.send_sfhash()
 
 		'''
 		s = socket.socket()
@@ -36,6 +39,25 @@ class Server:
 		f = open(f"{cwd}/uploads/{self.sfile}", 'rb')
 		file_data = f.read(1024)
 		conn.send(file_data) #file sent in utf-8 bytes
+
+	def send_sfhash(self):
+		s = socket.socket()
+		host = socket.gethostname()
+		print(f"host: {host}")
+		port = 910
+		s.bind((host, port))
+		s.listen(1)
+
+		sfhash = self.get_fhash()
+
+		conn, addr = s.accept()
+		conn.send(bytes(sfhash, "utf-8"))
+
+	def get_fhash(self):
+		cwd = os.getcwd()
+		file = f"{cwd}/uploads/{self.sfile}"
+		fhash = hashlib.sha256(open(file, 'rb').read()).hexdigest() #using sha256, stronger than md5
+		return fhash
 
 	def send_smac(self):
 		#function to send mac address to miner

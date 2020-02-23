@@ -3,8 +3,8 @@ import socket
 import re
 import uuid
 import datetime
-import pymongo
-from pymongo import MongoClient
+#import pymongo
+#from pymongo import MongoClient
 
 class Miner:
 

@@ -9,17 +9,11 @@ class Server:
 	def __init__(self):
 		global conn, addr
 		self.sfile = None
-		'''
-		self.send_smac()
-		'''
 
-		self.send_sfhash()
-
-		'''
 		s = socket.socket()
 		host = socket.gethostname()
 		print(f"host: {host}")
-		port = 908
+		port = 920
 		s.bind((host,port))
 		s.listen(1) #only one connection
 
@@ -27,8 +21,13 @@ class Server:
 		print('[+] Client has connected')
 
 		self.sfile = self.get_file()
+
 		self.send_file()
-		'''
+
+		self.send_smac()
+
+		self.send_sfhash()
+
 
 	def get_file(self):
 		file = input(str("[+] Input the name of the file you would like to send: ")) #holds path to files
@@ -44,7 +43,7 @@ class Server:
 		s = socket.socket()
 		host = socket.gethostname()
 		print(f"host: {host}")
-		port = 910
+		port = 911
 		s.bind((host, port))
 		s.listen(1)
 
@@ -52,6 +51,8 @@ class Server:
 
 		conn, addr = s.accept()
 		conn.send(bytes(sfhash, "utf-8"))
+
+		#socket.close(1) #close socket
 
 	def get_fhash(self):
 		cwd = os.getcwd()
@@ -72,6 +73,8 @@ class Server:
 
 		conn, addr = s.accept()
 		conn.send(bytes(smac, "utf-8"))
+
+		#socket.close(1) #close socket
 
 	def get_smac(self):
 		mac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))

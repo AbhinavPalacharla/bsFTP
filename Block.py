@@ -6,6 +6,7 @@ import hashlib
 from hashlib import sha256
 import random
 from random import *
+#cluster = MongoClient("mongodb+srv://Abhi:<password>@bsftp-ledger-lrklw.mongodb.net/test?retryWrites=true&w=majority")
 
 class Block:
 
@@ -22,6 +23,8 @@ class Block:
 		self.hash = None
 		self.prevHash = None
 		self.randomNum = 0
+
+		self.commit_to_ledger()
 
 	def generate_hash(self):
 
@@ -42,40 +45,58 @@ class Block:
 
 			solution = a*b
 
-		hashed_solution = hashlib.sha256(b'{solution}')
+		hashed_solution = hashlib.sha256(b'{solution}').hexdigest()
 
 		return hashed_solution
 
 	def get_prevHash(self):
-		cluster = MongoClient("mongodb+srv://Abhi:<password>@bsftp-ledger-lrklw.mongodb.net/test?retryWrites=true&w=majority")
+		cluster = MongoClient("mongodb+srv://MinerA:BsftpMinerA@bsftp-ledger-lrklw.mongodb.net/test?retryWrites=true&w=majority")
 		db = cluster["ledger"]
 		collection = db["transactions"]
 
-		last_id = db.transactions.count_documents({"time":"*"})
+		a = 0
+		for x in db.transactions.find({}, {"_id": "*"}):
+			a += 1
+
+		last_id = a - 1
+		#last_id = db.transactions.count_documents({"time":"*"})
 
 		document = db.transactions.find({"_id": last_id})
+		print(document)
+		#hash = document.get("block hash")
 
-		hash = document.get("block hash")
-
-		return hash
+		#return hash
 
 	def commit_to_ledger(self):
-		cluster = MongoClient("mongodb+srv://Abhi:<password>@bsftp-ledger-lrklw.mongodb.net/test?retryWrites=true&w=majority")
+		cluster = MongoClient("mongodb+srv://MinerA:BsftpMinerA@bsftp-ledger-lrklw.mongodb.net/test?retryWrites=true&w=majority")
 		db = cluster["ledger"]
 		collection = db["transactions"]
 
-		self.block_num = db.transactions.count_documents({"time":"*"}) #get all blocks that have been commited at any time (hacky way to get # of blocks because .count() deprecated)
+		#self.block_num = db.transactions.count_documents({"time":"*"}) #get all blocks that have been commited at any time (hacky way to get # of blocks because .count() deprecated)
+
+		a = 0
+
+		for x in db.transactions.find({}, {"_id": "*"}):
+
+			a += 1
+
+		self.blockNum = a
+
+		#print(self.blockNum)
+		if self.blockNum == 0:
+			self.genesis_block()
+
 		self.hash = self.generate_hash()
 		self.prevHash = self.get_prevHash()
 
-		collection.insert_one({"_id": block_num, "file hash": self.file, "server": self.server, "client": self.client, "miner": self.client, "time of transaction": self.time, "block hash": self.hash, "previous hash": self.prevHash}) #insert block to ledger
-
+		collection.insert_one({"_id": self.blockNum, "file hash": self.file, "server": self.server, "client": self.client, "miner": self.miner, "time of transaction": self.time, "block hash": self.hash, "previous hash": self.prevHash}) #insert block to ledger
+		print('block inserted')
 
 	def genesis_block(self):
-		if self.blockNum == 0:
-			self.hash = self.generate_hash()
+		self.hash = self.generate_hash()
 
-			cluster = MongoClient("mongodb+srv://Abhi:<password>@bsftp-ledger-lrklw.mongodb.net/test?retryWrites=true&w=majority")
-			db = cluster["ledger"]
-			collection = db["transactions"]
-			collection.insert_one("_id":0, "file hash": "genesis block","server": "genesis block", "client": "genesis block", "miner": "genesis block", "file hash": "genesis block", "block_hash": self.hash) #committing genesis block to ledger. Needed because there is no block with previous hash
+		cluster = MongoClient("mongodb+srv://MinerA:BsftpMinerA@bsftp-ledger-lrklw.mongodb.net/test?retryWrites=true&w=majority")
+		db = cluster["ledger"]
+		collection = db["transactions"]
+		collection.insert_one({"_id":0, "file hash": self.file, "server": self.server, "client": self.client, "miner": self.miner, "time of transaction": self.time, "block_hash": self.hash}) #committing genesis block to ledger. Needed because there is no block with previous hash
+		print('genesis block inserted')

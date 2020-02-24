@@ -3,6 +3,7 @@ import os
 import re
 import uuid
 import hashlib
+import time #for testing
 
 class Client:
 
@@ -11,7 +12,7 @@ class Client:
 		global s
 
 		s = socket.socket()
-		port = 908
+		port = 920
 		host = self.query_hostname()
 
 		print(f"[+] Connecting to {host} on port {port}")
@@ -19,6 +20,12 @@ class Client:
 
 		self.cfile = self.query_download()
 		self.download_file()
+
+		#time.sleep(10)
+
+		self.send_cmac()
+
+		self.send_cfhash()
 
 	def query_hostname(self):
 		hostname = input(str("[+] Enter the hostname of the server:  "))
@@ -41,7 +48,7 @@ class Client:
 		s = socket.socket()
 		host = socket.gethostname()
 		print(f"host: {host}")
-		port = 909
+		port = 910
 		s.bind((host, port))
 		s.listen(1)
 
@@ -50,22 +57,28 @@ class Client:
 		conn, addr = s.accept()
 		conn.send(bytes(cmac, "utf-8"))
 
+		#socket.close(1) #close socket
+
 	def get_cmac(self):
 		mac = ':'.join(re.findall('..', '%012x' % uuid.getnode()))
 		return mac
 
 	def send_cfhash(self):
 		s = socket.socket()
+		print(s)
 		host = socket.gethostname()
 		print(f"host: {host}")
-		port = 910
+		port = 912
 		s.bind((host, port))
+		print('client socket open')
 		s.listen(1)
 
 		cfhash = self.get_fhash()
 
 		conn, addr = s.accept()
 		conn.send(bytes(cfhash, "utf-8"))
+
+		#socket.close(1) #close socket
 
 	def get_fhash(self):
 		cwd = os.getcwd()

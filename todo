@@ -1,0 +1,2 @@
+- fix previous hash
+- fix block hash, it is currently identical, figure out why that is happening

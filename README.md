@@ -1,4 +1,4 @@
-Blockchain Secured File Transfer Protocol or bsFTP
+Blockchain Secured File Transfer Protocol or bsFTP ⛓️
 
 --progress--
 
